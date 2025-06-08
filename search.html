@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dansadaka Movie - Search</title>
+<style>
+  body, html {
+    margin: 0; padding: 0; min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: #eee;
+    background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+    background-size: cover;
+  }
+  nav {
+    background: rgba(17,17,17,0.9);
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.7);
+  }
+  nav button {
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+  }
+  nav button.active, nav button:hover {
+    background: #e50914;
+  }
+  main {
+    max-width: 700px;
+    margin: 40px auto 60px auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.9);
+  }
+  form {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  input[type=text] {
+    flex: 1;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+  }
+  select {
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    max-width: 150px;
+  }
+  button.search-btn {
+    background: #e50914;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 0.3s ease;
+  }
+  button.search-btn:hover {
+    background: #b0060f;
+  }
+  .result-list {
+    background: #222;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  .result-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #444;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .result-item:last-child {
+    border-bottom: none;
+  }
+  .result-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  .btn-watch {
+    background: #e50914;
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 0.3s ease;
+  }
+  .btn-watch:hover {
+    background: #b0060f;
+  }
+  p.no-results {
+    text-align: center;
+    padding: 20px 0;
+    font-style: italic;
+    color: #bbb;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <button onclick="goToPage('index.html')">Home</button>
+  <button onclick="goToPage('movies.html')">Movies</button>
+  <button onclick="goToPage('tvseries.html')">TV Series</button>
+  <button class="active" onclick="goToPage('search.html')">Search</button>
+  <button onclick="goToPage('login.html')">Login/Register</button>
+</nav>
+
+<main>
+  <form id="searchForm">
+    <input type="text" id="searchInput" placeholder="Search movies or TV series (optional)" />
+    <select id="searchType">
+      <option value="all">All</option>
+      <option value="movie">Movie</option>
+      <option value="tv">TV Series</option>
+    </select>
+    <button class="search-btn" type="submit">Search</button>
+  </form>
+
+  <div class="result-list" id="resultList" style="display:none;"></div>
+</main>
+
+<script>
+  // Sample data - replace or sync with your real data
+  const movies = [
+    { title: "Gangs of Lagos (Nigeria)", type: "movie", size: "2.4 GB" },
+    { title: "Fast & Furious 9 (USA)", type: "movie", size: "3.1 GB" },
+    { title: "RRR (India)", type: "movie", size: "3.7 GB" },
+    { title: "King of Boys (Nigeria)", type: "movie", size: "2.9 GB" },
+    { title: "Avengers: Endgame (USA)", type: "movie", size: "4.5 GB" },
+    { title: "Jagun Jagun (Nigeria)", type: "movie", size: "2.2 GB" },
+    { title: "Extraction 2 (USA)", type: "movie", size: "3.3 GB" },
+    { title: "The Batman (USA)", type: "movie", size: "4.2 GB" },
+    { title: "Omo Ghetto: The Saga (Nigeria)", type: "movie", size: "2.5 GB" },
+    { title: "Pathaan (India)", type: "movie", size: "3.8 GB" }
+  ];
+
+  const tvseries = [
+    { title: "Lagos Nights", type: "tv", size: "5.2 GB" },
+    { title: "American Detectives", type: "tv", size: "5.5 GB" },
+    { title: "Mumbai Stories", type: "tv", size: "4.8 GB" },
+    { title: "Nigerian Saga", type: "tv", size: "4.0 GB" },
+    { title: "Thrilling Tales", type: "tv", size: "6.1 GB" }
+  ];
+
+  const allItems = [...movies, ...tvseries];
+
+  const form = document.getElementById('searchForm');
+  const resultList = document.getElementById('resultList');
+  const searchInput = document.getElementById('searchInput');
+  const searchType = document.getElementById('searchType');
+
+  window.addEventListener('load', () => {
+    displayResults(allItems);
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = searchInput.value.trim().toLowerCase();
+    const type = searchType.value;
+
+    const filtered = allItems.filter(item => {
+      const matchesType = (type === 'all' || item.type === type);
+      const matchesQuery = query === '' || item.title.toLowerCase().includes(query);
+      return matchesType && matchesQuery;
+    });
+
+    displayResults(filtered);
+  });
+
+  function displayResults(results) {
+    if (results.length === 0) {
+      resultList.style.display = 'block';
+      resultList.innerHTML = '<p class="no-results">No results found.</p>';
+      return;
+    }
+
+    resultList.style.display = 'block';
+    resultList.innerHTML = results.map(item => `
+      <div class="result-item">
+        <div class="result-title">${item.title} (${item.type === 'movie' ? 'Movie' : 'TV Series'})</div>
+        <div>
+          <span>${item.size}</span>
+          <button class="btn-watch" onclick="watchItem('${encodeURIComponent(item.title)}', '${item.type}')">Watch</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Redirect to movies.html or tvseries.html with query param for title
+  function watchItem(title, type) {
+    const page = type === 'movie' ? 'movies.html' : 'tvseries.html';
+    // URL encode the title for safety
+    window.location.href = `${page}?title=${title}`;
+  }
+
+  function goToPage(page) {
+    window.location.href = page;
+  }
+</script>
+
+</body>
+</html>

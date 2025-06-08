@@ -1,0 +1,27 @@
+<footer style="background:#111; color:#eee; padding:20px 10px; text-align:center; font-family: Arial, sans-serif; user-select:none; box-shadow: inset 0 1px 5px rgba(255,255,255,0.05);">
+  <div style="margin-bottom: 12px; font-size: 1.2rem;">
+    <span style="margin-right:12px; cursor:pointer;" title="Facebook">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#eee" viewBox="0 0 24 24">
+        <path d="M22 12a10 10 0 1 0-11.5 9.87v-6.98h-2.9v-2.9h2.9v-2.2c0-2.87 1.7-4.46 4.3-4.46 1.25 0 2.56.23 2.56.23v2.8h-1.44c-1.42 0-1.86.89-1.86 1.8v2.33h3.16l-.51 2.9h-2.65v6.98A10 10 0 0 0 22 12z"/>
+      </svg>
+    </span>
+    <span style="margin-right:12px; cursor:pointer;" title="YouTube">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#eee" viewBox="0 0 24 24">
+        <path d="M19.8 7.2c-.2-.8-.82-1.4-1.6-1.6-1.4-.4-7-.4-7 0-.8.2-1.4.82-1.6 1.6-.4 1.4-.4 4.4 0 5.8.2.8.82 1.4 1.6 1.6 1.4.4 7 .4 7 0 .8-.2 1.4-.82 1.6-1.6.4-1.4.4-4.4 0-5.8zM10 14.5v-5l4.5 2.5-4.5 2.5z"/>
+      </svg>
+    </span>
+    <span style="cursor:pointer;" title="Instagram">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#eee" viewBox="0 0 24 24">
+        <path d="M7 2C4.25 2 2 4.25 2 7v10c0 2.75 2.25 5 5 5h10c2.75 0 5-2.25 5-5V7c0-2.75-2.25-5-5-5H7zm7.5 3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-4.5 2c2.25 0 4 1.75 4 4s-1.75 4-4 4-4-1.75-4-4 1.75-4 4-4zm7.5 10.25c0 .4-.35.75-.75.75H7c-.4 0-.75-.35-.75-.75v-6.5h1.5c-.1 1.1.4 2.25 1.4 3.25s2.15 1.5 3.25 1.4h1.5v2.35z"/>
+      </svg>
+    </span>
+  </div>
+  <div style="font-size: 0.9rem; user-select:none;">
+    &copy; Dansadaka Movie <span id="footerYear"></span>
+  </div>
+
+  <script>
+    // Set current year dynamically in footer
+    document.getElementById('footerYear').textContent = new Date().getFullYear();
+  </script>
+</footer>

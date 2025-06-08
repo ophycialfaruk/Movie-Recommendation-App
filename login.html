@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dansadaka Movie - Login/Register</title>
+<style>
+  body, html {
+    margin: 0; padding: 0; height: 100vh;
+    background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    color: #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  nav {
+    background:#111;
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    padding:15px 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 20;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  }
+  nav button, nav .profile-icon {
+    background:#333;
+    color:#fff;
+    border:none;
+    padding:10px 15px;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    user-select: none;
+    position: relative;
+  }
+  nav button.active, nav button:hover, nav .profile-icon:hover {
+    background:#e50914;
+  }
+  nav .profile-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 1.3rem;
+    justify-content: center;
+    text-transform: uppercase;
+    position: relative;
+  }
+  nav .profile-dropdown {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: #222;
+    border-radius: 6px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.7);
+    overflow: hidden;
+    display: none;
+    min-width: 120px;
+    z-index: 30;
+  }
+  nav .profile-dropdown button {
+    width: 100%;
+    background: transparent;
+    color: #eee;
+    border: none;
+    padding: 10px 15px;
+    text-align: left;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  nav .profile-dropdown button:hover {
+    background: #e50914;
+  }
+
+  .form-container {
+    background: rgba(0,0,0,0.8);
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.9);
+    width: 360px;
+    box-sizing: border-box;
+    max-width: 90vw;
+  }
+  h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  label {
+    display: block;
+    margin-bottom: 6px;
+  }
+  input[type=text], input[type=password], input[type=email] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    outline: none;
+  }
+  button.submit-btn {
+    width: 100%;
+    background: #e50914;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: background 0.3s ease;
+  }
+  button.submit-btn:hover {
+    background: #b0060f;
+  }
+  .toggle-link {
+    text-align: center;
+    margin-top: 15px;
+    cursor: pointer;
+    color: #e50914;
+    font-weight: 600;
+    user-select: none;
+  }
+  .error-msg {
+    color: #f33;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .success-msg {
+    color: #0f0;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  /* Responsive tweaks */
+  @media (max-width: 400px) {
+    .form-container {
+      padding: 20px;
+      width: 90vw;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav id="navBar">
+  <button onclick="goToPage('index.html')">Home</button>
+  <button onclick="goToPage('movies.html')">Movies</button>
+  <button onclick="goToPage('tvseries.html')">TV Series</button>
+  <button onclick="goToPage('search.html')">Search</button>
+  <!-- Login/Register or Profile icon inserted here dynamically -->
+</nav>
+
+<div class="form-container" id="formContainer">
+  <!-- Form content injected by JS -->
+</div>
+
+<script>
+  const navBar = document.getElementById('navBar');
+  const formContainer = document.getElementById('formContainer');
+
+  // User state stored in localStorage for demo purposes
+  // In real app, use server auth/session
+  let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+  function goToPage(page) {
+    window.location.href = page;
+  }
+
+  // Profile dropdown toggle
+  function toggleProfileDropdown() {
+    const dropdown = document.querySelector('.profile-dropdown');
+    if (!dropdown) return;
+    dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // Logout function
+  function logout() {
+    localStorage.removeItem('currentUser');
+    currentUser = null;
+    renderNav();
+    renderLoginForm();
+  }
+
+  // Render nav login/register buttons or profile icon if logged in
+  function renderNav() {
+    // Remove previous login/register/profile elements
+    const existing = document.querySelectorAll('.nav-dynamic');
+    existing.forEach(el => el.remove());
+
+    if (currentUser) {
+      // Show profile icon with first letter of username
+      const profileBtn = document.createElement('button');
+      profileBtn.className = 'profile-icon nav-dynamic';
+      profileBtn.title = currentUser.username;
+      profileBtn.textContent = currentUser.username[0].toUpperCase();
+      profileBtn.onclick = toggleProfileDropdown;
+
+      // Dropdown menu
+      const dropdown = document.createElement('div');
+      dropdown.className = 'profile-dropdown nav-dynamic';
+
+      const logoutBtn = document.createElement('button');
+      logoutBtn.textContent = 'Logout';
+      logoutBtn.onclick = logout;
+
+      dropdown.appendChild(logoutBtn);
+
+      navBar.appendChild(profileBtn);
+      navBar.appendChild(dropdown);
+
+      // Close dropdown if clicked outside
+      document.addEventListener('click', (e) => {
+        if (!profileBtn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+    } else {
+      // Show login/register button
+      const loginBtn = document.createElement('button');
+      loginBtn.className = 'nav-dynamic active';
+      loginBtn.textContent = 'Login/Register';
+      loginBtn.onclick = () => {
+        renderLoginForm();
+      };
+      navBar.appendChild(loginBtn);
+    }
+  }
+
+  // Show messages
+  function showMessage(msg, type) {
+    const existingMsg = document.getElementById('message');
+    if (existingMsg) existingMsg.remove();
+
+    const div = document.createElement('div');
+    div.id = 'message';
+    div.className = (type === 'error') ? 'error-msg' : 'success-msg';
+    div.textContent = msg;
+    formContainer.prepend(div);
+  }
+
+  // Validate email format
+  function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  // Render login form
+  function renderLoginForm() {
+    formContainer.innerHTML = `
+      <h2>Login</h2>
+      <form id="loginForm">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required />
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+        <button type="submit" class="submit-btn">Login</button>
+      </form>
+      <div class="toggle-link" id="toggleLink">Don't have an account? Register here</div>
+    `;
+
+    document.getElementById('toggleLink').addEventListener('click', renderRegisterForm);
+
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = loginForm.username.value.trim();
+      const password = loginForm.password.value.trim();
+
+      if (!username || !password) {
+        showMessage('Please fill in all fields', 'error');
+        return;
+      }
+
+      // Check if user exists (mocked using localStorage)
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+
+      if (!user) {
+        showMessage('User not found. Please register first.', 'error');
+        return;
+      }
+
+      if (user.password !== password) {
+        showMessage('Incorrect password.', 'error');
+        return;
+      }
+
+      // Login success
+      currentUser = { username: user.username };
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      showMessage(`Logged in as ${user.username}`, 'success');
+
+      setTimeout(() => {
+        goToPage('index.html'); // Redirect to home after login success
+      }, 1200);
+      renderNav();
+    });
+  }
+
+  // Render register form
+  function renderRegisterForm() {
+    formContainer.innerHTML = `
+      <h2>Register</h2>
+      <form id="registerForm">
+        <label for="usernameR">Username</label>
+        <input type="text" id="usernameR" name="usernameR" required />
+        <label for="emailR">Email</label>
+        <input type="email" id="emailR" name="emailR" required />
+        <label for="passwordR">Password</label>
+        <input type="password" id="passwordR" name="passwordR" required />
+        <button type="submit" class="submit-btn">Register</button>
+      </form>
+      <div class="toggle-link" id="toggleLink">Already have an account? Login here</div>
+    `;
+
+    document.getElementById('toggleLink').addEventListener('click', renderLoginForm);
+
+    const registerForm = document.getElementById('registerForm');
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = registerForm.usernameR.value.trim();
+      const email = registerForm.emailR.value.trim();
+      const password = registerForm.passwordR.value.trim();
+
+      if (!username || !email || !password) {
+        showMessage('Please fill in all fields', 'error');
+        return;
+      }
+      if (!validateEmail(email)) {
+        showMessage('Please enter a valid email', 'error');
+        return;
+      }
+
+      // Check if username or email exists
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+        showMessage('Username already exists', 'error');
+        return;
+      }
+      if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+        showMessage('Email already registered', 'error');
+        return;
+      }
+
+      // Save new user (in localStorage for demo)
+      users.push({ username, email, password });
+      localStorage.setItem('users', JSON.stringify(users));
+
+      showMessage('Registration successful! Redirecting to login...', 'success');
+
+      setTimeout(() => {
+        renderLoginForm();
+      }, 1500);
+    });
+  }
+
+  // Initial rendering
+  renderNav();
+
+  if (currentUser) {
+    // Show welcome message instead of login form
+    formContainer.innerHTML = `
+      <h2>Welcome back, ${currentUser.username}!</h2>
+      <p>You are already logged in.</p>
+    `;
+  } else {
+    renderLoginForm();
+  }
+</script>
+
+</body>
+</html>

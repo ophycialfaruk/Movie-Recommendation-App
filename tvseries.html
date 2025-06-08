@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Dansadaka Series – TV Series</title>
+  <style>
+    body,html {
+      margin:0; padding:0; min-height:100vh;
+      background: url('main.jpg') center/cover no-repeat fixed;
+      font-family:Arial,sans-serif; color:#eee;
+    }
+    nav {
+      background:rgba(0,0,0,0.85); display:flex;
+      justify-content:center; gap:20px; padding:15px 0;
+      position:sticky; top:0; z-index:10;
+    }
+    nav button {
+      background:#333; color:#fff; border:none;
+      padding:10px 15px; border-radius:5px;
+      cursor:pointer; font-weight:600; transition:0.3s;
+    }
+    nav button.active, nav button:hover { background:#e50914; }
+    main {
+      max-width:1200px; margin:30px auto;
+      padding:0 20px; display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+      gap:25px;
+    }
+    .series-card {
+      background:rgba(0,0,0,0.75); border-radius:10px;
+      overflow:hidden; position:relative; display:flex;
+      flex-direction:column;
+    }
+    .watermark {
+      position:absolute; top:8px; right:10px;
+      background:rgba(255,0,0,0.6); padding:3px 8px;
+      font-size:0.85rem; font-weight:bold; color:#fff;
+      z-index:2;
+    }
+    video {
+      width:100%; height:auto;
+      display:block;
+    }
+    .series-content {
+      padding:15px;
+    }
+    .series-title {
+      font-size:1.2rem; font-weight:bold;
+      margin-bottom:5px;
+    }
+    .series-size {
+      font-size:0.95rem; color:#ccc;
+      margin-bottom:10px;
+    }
+    .series-desc {
+      font-size:0.9rem; color:#aaa; margin-bottom:10px;
+    }
+    .expand, .btn-download {
+      color:#00ffff; font-size:0.85rem; cursor:pointer;
+    }
+    .btn-download { display:inline-block; margin-top:5px; }
+    #toggleMore {
+      text-align:center;
+      margin:30px auto;
+    }
+    #toggleMore button {
+      background:#e50914;
+      border:none;
+      color:#fff;
+      padding:10px 20px;
+      border-radius:6px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <button onclick="goToPage('index.html')">Home</button>
+  <button onclick="goToPage('movies.html')">Movies</button>
+  <button class="active" onclick="goToPage('tvseries.html')">TV Series</button>
+  <button onclick="goToPage('search.html')">Search</button>
+  <button onclick="goToPage('login.html')">Login/Register</button>
+</nav>
+
+<main id="seriesGrid"></main>
+
+<div id="toggleMore">
+  <button onclick="toggleMoreSeries()">See More</button>
+</div>
+
+<script>
+const seriesList = [
+  {
+    title: "Blood Sisters (Nigeria)",
+    size: "1.5 GB",
+    desc: "Thrilling tale of friendship, secrets, and survival in Lagos.",
+    src: "https://www.w3schools.com/html/mov_bbb.mp4",
+    poster: "bloodsisters.jpg"
+  },
+  {
+    title: "Loki Season 1 (USA)",
+    size: "4.8 GB",
+    desc: "Marvel’s God of Mischief embarks on a new timeline adventure.",
+    src: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    poster: "loki.jpg"
+  },
+  {
+    title: "Sacred Games (India)",
+    size: "5.2 GB",
+    desc: "Dark crime thriller based on the novel by Vikram Chandra.",
+    src: "https://media.w3.org/2010/05/bunny/trailer.mp4",
+    poster: "sacredgames.jpg"
+  },
+  {
+    title: "King of Boys: The Return (Nigeria)",
+    size: "3.1 GB",
+    desc: "Sequel to political thriller about power and corruption in Lagos.",
+    src: "https://media.w3.org/2010/05/video/movie.mp4",
+    poster: "kobreturn.jpg"
+  },
+  {
+    title: "Stranger Things Season 4 (USA)",
+    size: "6.0 GB",
+    desc: "Mystery and supernatural drama in Hawkins, Indiana.",
+    src: "https://media.w3.org/2010/05/video/movie_300.mp4",
+    poster: "strangerthings4.jpg"
+  },
+  {
+    title: "The Legend of Haolan (China)",
+    size: "3.8 GB",
+    desc: "Historical drama about the rise of a powerful queen.",
+    src: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    poster: "haolan.jpg"
+  },
+  {
+    title: "Money Heist (Spain)",
+    size: "5.5 GB",
+    desc: "A criminal mastermind plans the biggest heist in Spain's history.",
+    src: "https://media.w3.org/2010/05/bunny/trailer.mp4",
+    poster: "moneyheist.jpg"
+  },
+  {
+    title: "The Crown Season 5 (UK)",
+    size: "4.4 GB",
+    desc: "Drama based on the reign of Queen Elizabeth II.",
+    src: "https://media.w3.org/2010/05/video/movie.mp4",
+    poster: "thecrown.jpg"
+  }
+];
+
+const grid = document.getElementById('seriesGrid');
+let showingAll = false;
+
+function renderSeries(limit = 6) {
+  grid.innerHTML = "";
+  seriesList.slice(0, limit).forEach((s, idx) => {
+    const card = document.createElement('div');
+    card.className = 'series-card';
+    card.innerHTML = `
+      <span class="watermark">Dansadaka Series</span>
+      <video controls poster="${s.poster}" id="vid${idx}">
+        <source src="${s.src}" type="video/mp4"/>
+      </video>
+      <div class="series-content">
+        <div class="series-title">${s.title}</div>
+        <div class="series-size">${s.size}</div>
+        <div class="series-desc hidden" id="desc${idx}">${s.desc}</div>
+        <span class="expand" onclick="toggleDesc('desc${idx}')">Video Details</span><br>
+        <a class="btn-download" href="${s.src}" download>⬇️ Download Now</a>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  setupVideoControls();
+}
+
+function toggleMoreSeries() {
+  showingAll = !showingAll;
+  renderSeries(showingAll ? seriesList.length : 6);
+  document.querySelector('#toggleMore button').innerText = showingAll ? "See Less" : "See More";
+}
+
+function toggleDesc(id) {
+  document.getElementById(id).classList.toggle('hidden');
+}
+
+function setupVideoControls() {
+  const vids = document.querySelectorAll('video');
+  vids.forEach(v => {
+    v.addEventListener('play', () => {
+      vids.forEach(o => { if (o !== v) o.pause(); });
+    });
+    v.addEventListener('ended', () => { v.play(); });
+  });
+}
+
+function goToPage(page) {
+  window.location.href = page;
+}
+
+// Initial render
+renderSeries();
+</script>
+
+</body>
+</html>

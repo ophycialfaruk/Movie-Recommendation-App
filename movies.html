@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Dansadaka Movie – Movies</title>
+  <style>
+    body,html {
+      margin:0; padding:0; min-height:100vh;
+      background: url('main.jpg') center/cover no-repeat fixed;
+      font-family:Arial,sans-serif; color:#eee;
+    }
+    nav {
+      background:rgba(0,0,0,0.85); display:flex;
+      justify-content:center; gap:20px; padding:15px 0;
+      position:sticky; top:0; z-index:10;
+    }
+    nav button {
+      background:#333; color:#fff; border:none;
+      padding:10px 15px; border-radius:5px;
+      cursor:pointer; font-weight:600; transition:0.3s;
+    }
+    nav button.active, nav button:hover { background:#e50914; }
+    main {
+      max-width:1200px; margin:30px auto;
+      padding:0 20px; display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+      gap:25px;
+    }
+    .movie-card {
+      background:rgba(0,0,0,0.75); border-radius:10px;
+      overflow:hidden; position:relative; display:flex;
+      flex-direction:column;
+    }
+    .watermark {
+      position:absolute; top:8px; right:10px;
+      background:rgba(255,0,0,0.6); padding:3px 8px;
+      font-size:0.85rem; font-weight:bold; color:#fff;
+      z-index:2;
+    }
+    video {
+      width:100%; height:auto;
+      display:block;
+    }
+    .movie-content {
+      padding:15px;
+    }
+    .movie-title {
+      font-size:1.2rem; font-weight:bold;
+      margin-bottom:5px;
+    }
+    .movie-size {
+      font-size:0.95rem; color:#ccc;
+      margin-bottom:10px;
+    }
+    .movie-desc {
+      font-size:0.9rem; color:#aaa; margin-bottom:10px;
+    }
+    .expand, .btn-download {
+      color:#00ffff; font-size:0.85rem; cursor:pointer;
+    }
+    .btn-download { display:inline-block; margin-top:5px; }
+    #toggleMore {
+      text-align:center;
+      margin:30px auto;
+    }
+    #toggleMore button {
+      background:#e50914;
+      border:none;
+      color:#fff;
+      padding:10px 20px;
+      border-radius:6px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <button onclick="goToPage('index.html')">Home</button>
+  <button class="active" onclick="goToPage('movies.html')">Movies</button>
+  <button onclick="goToPage('tvseries.html')">TV Series</button>
+  <button onclick="goToPage('search.html')">Search</button>
+  <button onclick="goToPage('login.html')">Login/Register</button>
+</nav>
+
+<main id="movieGrid"></main>
+
+<div id="toggleMore">
+  <button onclick="toggleMoreMovies()">See More</button>
+</div>
+
+<script>
+const movies = [
+  {
+    title: "Gangs of Lagos (Nigeria)",
+    size: "2.4 GB",
+    desc: "Crime-action set in Isale Eko streets, exploring friendship, conflict, and survival.",
+    src: "https://www.w3schools.com/html/mov_bbb.mp4",
+    poster: "lagos.jpg"
+  },
+  {
+    title: "Fast & Furious 9 (USA)",
+    size: "3.1 GB",
+    desc: "Dom's crew faces immense challenges and family drama in high-speed action.",
+    src: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+	
+    poster: "fast9.jpg"
+  },
+  {
+    title: "RRR (India)",
+    size: "3.7 GB",
+    desc: "Epic pre-independence saga featuring revolutionaries fighting British rule.",
+    src: "https://media.w3.org/2010/05/bunny/trailer.mp4",
+    poster: "rrr.jpg"
+  },
+  {
+    title: "King of Boys (Nigeria)",
+    size: "2.9 GB",
+    desc: "Political thriller about power, corruption, and redemption in Lagos.",
+    src: "https://media.w3.org/2010/05/video/movie.mp4",
+    poster: "kob.jpg"
+  },
+  {
+    title: "Avengers: Endgame (USA)",
+    size: "4.5 GB",
+    desc: "Superhero team reunites to undo the Thanos snap and save the universe.",
+    src: "https://media.w3.org/2010/05/video/movie_300.mp4",
+    poster: "endgame.jpg"
+  },
+  {
+    title: "Jagun Jagun (Nigeria)",
+    size: "2.2 GB",
+    desc: "A young warrior must confront a deadly warlord threatening his land.",
+    src: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    poster: "jagun.jpg"
+  },
+  {
+    title: "Extraction 2 (USA)",
+    size: "3.3 GB",
+    desc: "Tyler Rake returns for another high-stakes rescue mission in hostile territory.",
+    src: "https://media.w3.org/2010/05/bunny/trailer.mp4",
+    poster: "extraction.jpg"
+  },
+  {
+    title: "The Batman (USA)",
+    size: "4.2 GB",
+    desc: "Batman uncovers corruption in Gotham while pursuing the Riddler.",
+    src: "https://media.w3.org/2010/05/video/movie.mp4",
+    poster: "batman.jpg"
+  },
+  {
+    title: "Omo Ghetto: The Saga (Nigeria)",
+    size: "2.5 GB",
+    desc: "Twin sisters navigate chaos and comedy in their ghetto lifestyle.",
+    src: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    poster: "omo.jpg"
+  },
+  {
+    title: "Pathaan (India)",
+    size: "3.8 GB",
+    desc: "A spy returns to stop a bio-terrorist threat to India.",
+    src: "https://media.w3.org/2010/05/bunny/trailer.mp4",
+    poster: "pathaan.jpg"
+  }
+];
+
+const grid = document.getElementById('movieGrid');
+let showingAll = false;
+
+function renderMovies(limit = 6) {
+  grid.innerHTML = "";
+  movies.slice(0, limit).forEach((m, idx) => {
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    card.innerHTML = `
+      <span class="watermark">Dansadaka Movie</span>
+      <video controls poster="${m.poster}" id="vid${idx}">
+        <source src="${m.src}" type="video/mp4"/>
+      </video>
+      <div class="movie-content">
+        <div class="movie-title">${m.title}</div>
+        <div class="movie-size">${m.size}</div>
+        <div class="movie-desc hidden" id="desc${idx}">${m.desc}</div>
+        <span class="expand" onclick="toggleDesc('desc${idx}')">Video Details</span><br>
+        <a class="btn-download" href="${m.src}" download>⬇️ Download Now</a>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  setupVideoControls();
+}
+
+function toggleMoreMovies() {
+  showingAll = !showingAll;
+  renderMovies(showingAll ? movies.length : 6);
+  document.querySelector('#toggleMore button').innerText = showingAll ? "See Less" : "See More";
+}
+
+function toggleDesc(id) {
+  document.getElementById(id).classList.toggle('hidden');
+}
+
+function setupVideoControls() {
+  const vids = document.querySelectorAll('video');
+  vids.forEach(v => {
+    v.addEventListener('play', () => {
+      vids.forEach(o => { if (o !== v) o.pause(); });
+    });
+    v.addEventListener('ended', () => { v.play(); });
+  });
+}
+
+function goToPage(page) {
+  window.location.href = page;
+}
+
+// Initial render
+renderMovies();
+</script>
+
+</body>
+</html>
